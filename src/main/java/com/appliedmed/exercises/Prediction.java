@@ -48,7 +48,40 @@ public class Prediction {
          * 40% of the List's points were deleted (set to null). Interpolate 
          * those points. You may either do this in-place or calculate a new List.
          */
-        return points;
+    	List<Point> returnList = new ArrayList<>();
+        for (Point p : points) {
+        	// 40% out of the points == null
+            // we need to interpolate 40% missing points back from 60% available points
+            // 40% of 100% is 66.7% of the 60% available ones
+            if (Math.random() < 0.667 && p != null) {
+            	// Map to hold nearest neighbor
+            	Map<String, Double> closestPoint = new HashMap<String, Double>();
+            	double minimumDistance = 999999999;
+            	// find the closest point ( point with min distance) to our randomly selected point
+            	for (Point d : points) {
+            		if( d != null) {
+            			// Distance between two points
+	            		double valueToSqrt = Math.pow((d.x - p.x),2) + Math.pow((d.y - p.y),2);
+	            		double currentDistance = Math.sqrt(valueToSqrt);
+	            		// Check if our distance is the new minimum
+	            		// && currentDistance != 0 avoids comparing itself!
+	            		if(currentDistance < minimumDistance && currentDistance != 0){
+	            			// if new minimum, update min dist, and closest point mapping
+	            			minimumDistance = currentDistance;
+	            			closestPoint.put("closestX", d.x);
+	            			closestPoint.put("closestY", d.y);
+	            		}
+            		}
+            	} // end loop to find closest point
+            	//interpolate a value between the random point and the closest point to it
+            	//midpoint formula
+            	double xValue = (p.x + closestPoint.get("closestX"))/2;
+            	double yValue = (p.y + closestPoint.get("closestY"))/2;
+
+            	returnList.add(new Point(xValue, yValue));
+            }      
+        }
+        return returnList;
     }
 
     public static void main(String[] args) throws Exception {
